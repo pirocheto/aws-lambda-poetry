@@ -1,21 +1,5 @@
-
 export LAMBDA_FUNCTION_NAME = lambda-function-test
 export DIST_DIR = dist
-
-.PHONY: test
-test:
-	python -m pytest
-
-.PHONY: build
-build:
-	@if [ -d ${DIST_DIR} ]; then rm -r ${DIST_DIR}; fi
-	@poetry export -f requirements.txt --output requirements.txt.tmp --without-hashes --only main \
-		&& poetry run pip install -r requirements.txt.tmp -t ${DIST_DIR}/lambda \
-		&& rm requirements.txt.tmp
-	@cp -r src/* ./${DIST_DIR}/lambda
-	@cd ${DIST_DIR}/lambda && zip -r ../lambda.zip * -x '*.pyc' -x '__pycache__/*'
-	@du -smh ${DIST_DIR}/lambda ${DIST_DIR}/lambda.zip
-
 
 .PHONY: create-role
 create-role:
@@ -38,10 +22,20 @@ create:
 		--role $$ARN \
 		--handler lambda_function.lambda_handler \
 		--zip-file fileb://${DIST_DIR}/lambda.zip \
-		--timeout 15 \
+		--timeout 5 \
 		--memory-size 128 \
 		--output yaml \
 		--no-cli-pager 
+
+.PHONY: build
+build:
+	@if [ -d ${DIST_DIR} ]; then rm -r ${DIST_DIR}; fi
+	@poetry export -f requirements.txt --output requirements.txt.tmp --without-hashes --only main \
+		&& poetry run pip install -r requirements.txt.tmp -t ${DIST_DIR}/lambda \
+		&& rm requirements.txt.tmp
+	@cp -r src/* ./${DIST_DIR}/lambda
+	@cd ${DIST_DIR}/lambda && zip -r ../lambda.zip * -x '*.pyc' -x '__pycache__/*'
+	@du -smh ${DIST_DIR}/lambda ${DIST_DIR}/lambda.zip
 
 .PHONY: push
 push:
@@ -56,4 +50,10 @@ update: build push
 
 .PHONY: invoke
 invoke:
-	@aws lambda invoke --function-name ${LAMBDA_FUNCTION_NAME} output.json
+	@aws lambda invoke --function-name ${LAMBDA_FUNCTION_NAME} \
+		--payload '{"type": "programming"}' \
+		--cli-binary-format raw-in-base64-out output.json
+
+.PHONY: test
+test:
+	python -m pytest

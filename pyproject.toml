@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aws-lambda-poetry"
 version = "0.1.0"
-description = ""
+description = "Project to test AWS Lambda with Poetry"
 authors = ["pirocheto <pirocheto@gmail.com>"]
 readme = "README.md"
 
@@ -13,7 +13,6 @@ requests = "^2.31.0"
 pytest = "^8.1.1"
 
 [tool.pytest.ini_options]
-testpaths = ['tests']
 addopts = ["-s"]
 
 [build-system]

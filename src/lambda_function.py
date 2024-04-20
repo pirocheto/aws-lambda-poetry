@@ -2,6 +2,8 @@ import requests
 
 
 def lambda_handler(event, context):
+    """Lambda function to retrieve a random joke of a specified type."""
+
     joke_type = event["type"]
 
     # Call the API to retrieve a joke
